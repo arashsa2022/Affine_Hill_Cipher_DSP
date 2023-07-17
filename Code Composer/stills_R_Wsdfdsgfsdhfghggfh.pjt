@@ -1,0 +1,57 @@
+; Code Composer Project File, Version 2.0 (do not modify or remove this line)
+
+[Project Settings]
+ProjectDir="C:\Documents and Settings\Administrator\Desktop\mojtaba fazeliii\stills_R_Wsdfdsgfsdhfghggfh_ccslink\"
+ProjectType=Executable
+CPUFamily=TMS320C64XX
+Tool="Compiler"
+Tool="CustomBuilder"
+Tool="DspBiosBuilder"
+Tool="Linker"
+Config="CustomMW"
+Config="Debug"
+Config="Release"
+
+[Source Files]
+Source="..\..\..\..\..\CCStudio_v3.3\c6000\cgtools\lib\rts6400.lib"
+Source="..\..\..\..\..\CCStudio_v3.3\c6000\csl\lib\csl6416.lib"
+Source="..\..\..\..\..\Program Files\MATLAB\R2007b\toolbox\rtw\targets\ccslink\rtlib\dsp_rt_c6410.lib"
+Source="..\..\..\..\..\Program Files\MATLAB\R2007b\toolbox\rtw\targets\ccslink\rtlib\vip_rt_c6410.lib"
+Source="MW_c6xxx_csl.c"
+Source="stills_R_Wsdfdsgfsdhfghggfh.c"
+Source="stills_R_Wsdfdsgfsdhfghggfh.tcf"
+Source="stills_R_Wsdfdsgfsdhfghggfh_data.c"
+Source="stills_R_Wsdfdsgfsdhfghggfh_main.c"
+Source="stills_R_Wsdfdsgfsdhfghggfh.cmd"
+
+[Generated Files]
+Source="stills_R_Wsdfdsgfsdhfghggfhcfg.s62"
+Source="stills_R_Wsdfdsgfsdhfghggfhcfg_c.c"
+
+["Compiler" Settings: "CustomMW"]
+Options=-fr"C:\Documents and Settings\Administrator\Desktop\mojtaba fazeliii\stills_R_Wsdfdsgfsdhfghggfh_ccslink\CustomMW" -i"C:\Program Files\MATLAB\R2007b\toolbox\rtw\targets\ccslink\ccslink\inc" -i"C:\Documents and Settings\Administrator\Desktop\mojtaba fazeliii\stills_R_Wsdfdsgfsdhfghggfh_ccslink" -i"C:\Documents and Settings\Administrator\Desktop\mojtaba fazeliii" -i"C:\Documents and Settings\Administrator\Desktop\New Folder (7)\image prosessingarash" -i"C:\Program Files\MATLAB\R2007b\extern\include" -i"C:\Program Files\MATLAB\R2007b\simulink\include" -i"C:\Program Files\MATLAB\R2007b\rtw\c\src" -i"C:\Program Files\MATLAB\R2007b\rtw\c\libsrc" -i"C:\Program Files\MATLAB\R2007b\rtw\c\src\ext_mode\common" -i"C:\Program Files\MATLAB\R2007b\rtw\c\ert" -i"C:\Program Files\MATLAB\R2007b\toolbox\vipblks\include" -i"C:\Program Files\MATLAB\R2007b\toolbox\rtw\vipblks\c" -i"C:\Program Files\MATLAB\R2007b\toolbox\dspblks\include" -i"C:\Program Files\MATLAB\R2007b\toolbox\rtw\dspblks\c" -d"MODEL=stills_R_Wsdfdsgfsdhfghggfh" -d"NUMST=1" -d"NCSTATES=0" -d"HAVESTDIO=" -d"ONESTEPFCN=1" -d"TERMFCN=1" -d"MAT_FILE=0" -d"MULTI_INSTANCE_CODE=0" -d"INTEGER_CODE=0" -d"MT=0" -d"TID01EQ=0" -d"CHIP_6416" -d"__TICCSC__" -d"RT" -d"USE_RTMODEL" -d"MWDSP_INLINE_DSPRTLIB" -mv6400
+
+["Compiler" Settings: "Debug"]
+Options=-g -fr"$(Proj_dir)\Debug" -d"_DEBUG" -mv6400
+
+["Compiler" Settings: "Release"]
+Options=-o3 -fr"$(Proj_dir)\Release" -mv6400
+
+["Linker" Settings: "CustomMW"]
+Options=-c -m"stills_R_Wsdfdsgfsdhfghggfh.map" -o"stills_R_Wsdfdsgfsdhfghggfh.out" -stack0x2000 -x
+
+["Linker" Settings: "Debug"]
+Options=-c -m".\Debug\stills_R_Wsdfdsgfsdhfghggfh.map" -o".\Debug\stills_R_Wsdfdsgfsdhfghggfh.out" -w -x
+
+["Linker" Settings: "Release"]
+Options=-c -m".\Release\stills_R_Wsdfdsgfsdhfghggfh.map" -o".\Release\stills_R_Wsdfdsgfsdhfghggfh.out" -w -x
+
+["stills_R_Wsdfdsgfsdhfghggfh.cmd" Settings: "CustomMW"]
+LinkOrder=1
+
+["stills_R_Wsdfdsgfsdhfghggfh.cmd" Settings: "Debug"]
+LinkOrder=1
+
+["stills_R_Wsdfdsgfsdhfghggfh.cmd" Settings: "Release"]
+LinkOrder=1
+

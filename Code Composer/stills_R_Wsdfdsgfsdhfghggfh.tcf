@@ -1,0 +1,180 @@
+var params = {
+    clockRate: 1000,
+    catalogName: "ti.catalog.c6000",
+    deviceName: "6416"
+};
+
+
+// Customize generic platform with parameters specified above
+utils.loadPlatform("ti.platforms.generic", params);
+
+// Enable commonly used BIOS features
+bios.enableRealTimeAnalysis(prog);
+bios.enableRtdx(prog);
+bios.enableTskManager(prog);
+
+
+
+// Make sure that BIOS system timer uses Timer 0
+if (bios.CLK.TIMERSELECT != "Timer 0") {
+    bios.CLK.TIMERSELECT = "Timer 0";
+}
+
+// Reset BIOS timer when opening
+if (bios.CLK.RESETTIMER != undefined) {
+    bios.CLK.RESETTIMER = true;
+}
+
+var mem_seg;
+// Create memory segment for ISRAM
+mem_seg = bios.MEM.instance("ISRAM");
+if (mem_seg == null) {
+    mem_seg = bios.MEM.create("ISRAM");
+};
+mem_seg.space = "code/data";
+mem_seg.base = 0x0;
+mem_seg.len = 0xE0000;
+
+// Create memory segment for SDRAM
+mem_seg = bios.MEM.instance("SDRAM");
+if (mem_seg == null) {
+    mem_seg = bios.MEM.create("SDRAM");
+};
+mem_seg.space = "code/data";
+mem_seg.base = 0x80000000;
+mem_seg.len = 0x1000000;
+
+// Remove memory dependencies
+var mem;
+var refs;
+var i;
+var j;
+mem = bios.MEM.instances();
+for (i = 0; i < mem.length; i++) {
+    refs = mem[i].references();
+	for (j = 0; j < refs.length; j++) {
+		if (refs[j].OBJMEMSEG) {
+		   refs[j].OBJMEMSEG = prog.get("ISRAM");
+		}
+	}
+}
+
+// Map buffer memory segment for all HST instances to
+// the user specified value in "Data object placement"
+// pulldown in the Target Preferences block
+var hstList;
+hstList = bios.HST.instances();
+for (i = 0; i < hstList.length; i++) {
+    hstList[i].bufSeg = prog.get("ISRAM");
+}
+
+// Eliminate memory dependencies 
+// BIOSOBJ, MALLOCSEG and STACKSEG are read-only
+// when memory heaps are disabled
+if (bios.MEM.NOMEMORYHEAPS == false) {
+    bios.MEM.BIOSOBJSEG = prog.get("MEM_NULL");
+    bios.MEM.MALLOCSEG  = prog.get("MEM_NULL");
+    bios.TSK.STACKSEG   = prog.get("MEM_NULL");
+}
+bios.SYS.TRACESEG   = prog.get("ISRAM");
+
+// Eliminate load address memory dependencies
+bios.MEM.ENABLELOADADDR  = true;
+bios.MEM.LOADBIOSSEG     = prog.get("ISRAM");
+bios.MEM.LOADSYSINITSEG  = prog.get("ISRAM");
+bios.MEM.LOADGBLINITSEG  = prog.get("ISRAM");
+bios.MEM.LOADTRCDATASEG  = prog.get("ISRAM");
+bios.MEM.LOADTEXTSEG     = prog.get("ISRAM");
+bios.MEM.LOADSWITCHSEG   = prog.get("ISRAM");
+bios.MEM.LOADCINITSEG    = prog.get("ISRAM");
+bios.MEM.LOADPINITSEG    = prog.get("ISRAM");
+bios.MEM.LOADCONSTSEG    = prog.get("ISRAM");
+bios.MEM.LOADHWISEG      = prog.get("ISRAM");
+bios.MEM.LOADHWIVECSEG   = prog.get("ISRAM");
+bios.MEM.LOADRTDXTEXTSEG = prog.get("ISRAM");
+bios.MEM.ENABLELOADADDR  = false;
+
+load(utils.findFile('assert.tci'));
+prog.module("GBL").ENDIANMODE = "little";
+assert.add('prog.module("GBL").CSLNAME == "csl6416.lib"');
+prog.module("MEM").STACKSIZE = 0x2000;
+//DSP/BIOS sections;
+prog.module("MEM").ARGSSEG = prog.get("ISRAM");
+prog.module("MEM").GBLINITSEG = prog.get("SDRAM");
+prog.module("MEM").TRCDATASEG = prog.get("SDRAM");
+prog.module("MEM").SYSDATASEG = prog.get("ISRAM");
+prog.module("MEM").OBJSEG = prog.get("ISRAM");
+prog.module("MEM").BIOSSEG = prog.get("ISRAM");
+prog.module("MEM").SYSINITSEG = prog.get("SDRAM");
+prog.module("MEM").HWISEG = prog.get("ISRAM");
+prog.module("MEM").HWIVECSEG = prog.get("ISRAM");
+prog.module("MEM").RTDXTEXTSEG = prog.get("ISRAM");
+//Compiler sections;
+prog.module("MEM").TEXTSEG = prog.get("SDRAM");
+prog.module("MEM").SWITCHSEG = prog.get("SDRAM");
+prog.module("MEM").BSSSEG = prog.get("SDRAM");
+prog.module("MEM").FARSEG = prog.get("SDRAM");
+prog.module("MEM").CINITSEG = prog.get("SDRAM");
+prog.module("MEM").PINITSEG = prog.get("SDRAM");
+prog.module("MEM").CONSTSEG = prog.get("SDRAM");
+prog.module("MEM").DATASEG = prog.get("SDRAM");
+prog.module("MEM").CIOSEG = prog.get("SDRAM");
+prog.module("MEM").STACKSEG = prog.get("ISRAM");
+prog.module("LOG").create("LOG_MW1");
+prog.module("LOG").instance("LOG_MW1").bufSeg = prog.get("ISRAM");
+prog.module("TSK").ENABLETSK = true;
+prog.module("TSK").OBJMEMSEG = prog.get("ISRAM");
+prog.module("TSK").instance("TSK_idle").order = 1;
+prog.module("TSK").instance("TSK_idle").stackMemSeg = prog.get("SDRAM");
+prog.module("IDL").instance("LNK_dataPump").order = 1;
+prog.module("IDL").instance("RTA_dispatcher").order = 2;
+prog.module("IDL").instance("IDL_cpuLoad").order = 3;
+//Init/Terminate TSK.
+initTerminateTSK_TSK = prog.module("TSK").create("initTerminateTSK");
+initTerminateTSK_TSK.autoAllocateStack = true;
+initTerminateTSK_TSK.stackMemSeg = prog.get("SDRAM");
+initTerminateTSK_TSK.stackSize = 4096;
+initTerminateTSK_TSK.fxn = prog.extern("initTerminateTSK_fcn", "C");
+initTerminateTSK_TSK.priority = 15;
+initTerminateTSK_TSK.order = 1;
+initTerminateTSK_TSK.comment = "Init/Terminate TSK.";
+//Base rate task.
+tBaseRateTSK_TSK = prog.module("TSK").create("tBaseRateTSK");
+tBaseRateTSK_TSK.autoAllocateStack = true;
+tBaseRateTSK_TSK.stackMemSeg = prog.get("SDRAM");
+tBaseRateTSK_TSK.stackSize = 4096;
+tBaseRateTSK_TSK.fxn = prog.extern("tBaseRateTSK_fcn", "C");
+tBaseRateTSK_TSK.priority = 7;
+tBaseRateTSK_TSK.order = 1;
+tBaseRateTSK_TSK.comment = "Base rate task.";
+prog.module("SEM").OBJMEMSEG = prog.get("ISRAM");
+//Real-time clock semaphore.
+rtClockSEM = prog.module("SEM").create("rtClockSEM");
+rtClockSEM.comment = "Real-time clock semaphore.";
+//Stop semaphore.
+stopSEM = prog.module("SEM").create("stopSEM");
+stopSEM.comment = "Stop semaphore.";
+prog.module("LOG").instance("LOG_system").bufSeg = prog.get("ISRAM");
+prog.module("LOG").OBJMEMSEG = prog.get("ISRAM");
+prog.module("HST").HOSTLINKTYPE = "RTDX";
+prog.module("HST").instance("RTA_fromHost").bufSeg = prog.get("ISRAM");
+prog.module("HST").instance("RTA_toHost").bufSeg = prog.get("ISRAM");
+prog.module("RTDX").MODE = "JTAG";
+prog.module("RTDX").ENABLERTDX = 1;
+prog.module("RTDX").RTDXDATASEG = prog.get("ISRAM");
+assert.add('prog.module("HWI").instance("HWI_RESERVED1").useDispatcher == 1');
+prog.module("SYS").EXITFXN = prog.extern("exitprocessing");
+prog.module("HWI").instance("HWI_INT15").fxn = prog.extern("Timer1_ISR");
+prog.module("HWI").instance("HWI_INT15").useDispatcher = 1;
+prog.module("HWI").instance("HWI_INT15").arg = 1;
+prog.module("HWI").instance("HWI_INT15").interruptMask = "all";
+prog.module("GBL").CALLUSERINITFXN = true;
+prog.module("GBL").USERINITFXN = prog.extern("targetInitialize");
+prog.module("RTDX").MODE = "JTAG";
+
+bios.MEM.instance("IRAM").destroy();
+
+// !GRAPHICAL_CONFIG_TOOL_SCRIPT_INSERT_POINT!
+if (config.hasReportedError == false) {
+    prog.gen();
+}
